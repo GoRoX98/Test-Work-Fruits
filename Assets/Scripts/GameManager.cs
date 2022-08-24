@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private List<Slot> _slots;
+    [SerializeField] private bool _sandboxGame = false;
     private bool _isFirstLaunch = true;
+
+    public bool SandboxGame => _sandboxGame;
 
     private void Update()
     {
@@ -19,7 +23,7 @@ public class GameManager : MonoBehaviour
 
         foreach(Slot slot in _slots)
         {
-            if(!slot.Parent.activeSelf)
+            if(!slot.Parent.activeSelf && _sandboxGame)
             {
                 slot.Parent.SetActive(true);
             }
@@ -33,5 +37,24 @@ public class GameManager : MonoBehaviour
             await UniTask.Delay(TimeSpan.FromSeconds(seconds));
             slot.Parent.SetActive(true);
         }
+    }
+
+    public Slot.Fruits TakeFruit()
+    {
+        List<Slot.Fruits> fruitList = new List<Slot.Fruits>();
+        foreach(Slot slot in _slots)
+        {
+            if(slot.IsEmpty && !slot.PlayerSlot)
+            {
+                fruitList.Add(slot.SlotType);
+            }
+        }
+
+        if(fruitList.Count == 0)
+        {
+            return Slot.Fruits.Banana;
+        }
+
+        return fruitList[(int)Random.Range(0, fruitList.Count)];
     }
 }
